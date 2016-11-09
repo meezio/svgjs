@@ -1,0 +1,37 @@
+extends: google
+plugins:
+    - json
+rules:
+    max-len:
+        - 2
+        - code: 5000
+    indent:
+        - error
+        - 4
+    keyword-spacing:
+        - 2
+        - overrides:
+            if:
+                after: false
+            for:
+                after: false
+            catch:
+                after: false
+            switch:
+                after: false
+    brace-style:
+        - 2
+        - stroustrup
+    guard-for-in:
+        - 0
+    quote-props:
+        - 2
+        - as-needed
+env:
+    browser: true
+    amd: true
+globals:
+    # MeezioSVG
+    MeezioSVG: false
+    # event
+    observer: false

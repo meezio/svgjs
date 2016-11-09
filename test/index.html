@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compiled file test</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <script src="../build/svg.min.js"></script>
+    <script src="js/circle.js"></script>
+    <script src="js/box.js"></script>
+</head>
+<body>
+  <div id="drawing"></div>
+  <script type="text/javascript">
+  (function(SVG) {
+    SVG.options.editable.color = "#A8299D"; 
+
+    var doc = new SVG.Document("drawing").size(1200, 800);
+
+    var mbox = new SVG.Meeziobox(150, 80, "HelloI wPrlp");
+    var circle = new SVG.Circle(200, 40, 30).move(300, 200).size(150);
+
+    doc.add(circle);
+    doc.add(mbox);
+
+    mbox.size(200, 120);
+    mbox.move(50, 150);
+    circle.editable({
+        color: "black",
+        resizeSW: true,
+        resizeE: true,
+        resizeS: true,
+        resizeW: true,
+        resizeN: true,
+        move: false,
+        editText: true
+    });
+  })(MeezioSVG);
+  </script>
+
+</body>
+</html>

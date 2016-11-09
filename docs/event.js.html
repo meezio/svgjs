@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: event.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: event.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* MIT License
+*
+* Copyright (c) 2016 Meezio SAS &lt;dev@meez.io>
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** @namespace observer */
+(function(global) {
+    "use strict";
+
+    var observer = {
+        ev: {},
+
+        /**
+         * Attach a callback function to an event.
+         *
+         * @memberof observer
+         * @param {string} eventName A custom event name.
+         * @param {function} fn The function to execute when the event is triggered.
+         */
+        on: function(eventName, fn) {
+            if(typeof fn === "function") {
+                (this.ev[eventName] = this.ev[eventName] || []).push(fn);
+            }
+        },
+
+        /**
+         * Attach a callback function to an event. The callback is executed at most once.
+         *
+         * @memberof observer
+         * @param {string} eventName A custom event name.
+         * @param {function} fn The function to execute when the event is triggered.
+         */
+        one: function(eventName, fn) {
+            if(fn) {
+                fn.once = true;
+            }
+
+            this.on(eventName, fn);
+        },
+
+        /**
+         * Remove a callback function from an event.
+         *
+         * @memberof observer
+         * @param {string} eventName The custom event name.
+         * @param {function} fn The callback function previously attached to the event.
+         */
+        off: function(eventName, fn) {
+            if(eventName === "*") {
+                this.ev = {};
+            }
+            else if(this.ev[eventName]) {
+                if(fn) {
+                    for(var i = 0; i &lt; this.ev[eventName].length; i++) {
+                        if(this.ev[eventName][i] === fn) {
+                            this.ev[eventName].splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                else {
+                    this.ev[eventName] = [];
+                }
+            }
+        },
+
+        /**
+         * Execute all callbacks attached to an event.
+         *
+         * @memberof observer
+         * @param {string} eventName The custom event name.
+         */
+        trigger: function(eventName) {
+            var opts = [].slice.call(arguments, 1);
+            var fns = this.ev[eventName] || [];
+
+            for(var i = 0; i &lt; fns.length; i++) {
+                if(!fns[i].busy) {
+                    fns[i].busy = true;
+                    fns[i].apply(this.ev[eventName], opts);
+                    if(fns[i].once) {
+                        fns.splice(i, 1);
+                        i--;
+                    }
+                    else {
+                        fns[i].busy = false;
+                    }
+                }
+            }
+        }
+    };
+
+    global.observer = observer;
+})(this);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SVG.Document.html">SVG.Document</a></li><li><a href="SVG.Shape.html">SVG.Shape</a></li></ul><h3>Events</h3><ul><li><a href="SVG.Document.html#event:selectSVGDoc">SVG.Document#selectSVGDoc</a></li><li><a href="SVG.Shape.html#event:moveSVGShape">SVG.Shape#moveSVGShape</a></li><li><a href="SVG.Shape.html#event:resizeSVGShape">SVG.Shape#resizeSVGShape</a></li><li><a href="SVG.Shape.html#event:rotateSVGShape">SVG.Shape#rotateSVGShape</a></li><li><a href="SVG.Shape.html#event:selectSVGShape">SVG.Shape#selectSVGShape</a></li></ul><h3>Namespaces</h3><ul><li><a href="observer.html">observer</a></li><li><a href="SVG.html">SVG</a></li><li><a href="SVG.options.html">SVG.options</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 09 2016 22:18:45 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
