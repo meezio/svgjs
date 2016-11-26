@@ -84,7 +84,7 @@
         },
 
         /**
-         * Execute all callbacks attached to an event.
+         * Execute all callbacks attached to an event. Arguments following 'eventName' are passed to the called function.
          *
          * @memberof observer
          * @param {string} eventName The custom event name.

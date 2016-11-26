@@ -184,7 +184,10 @@
             version: "1.1",
             xmlns: SVG.ns
         });
-        document.getElementById(element).appendChild(this.node);
+
+        var container = document.getElementById(element);
+        container.innerHTML = '';
+        container.appendChild(this.node);
     };
 
     /**
