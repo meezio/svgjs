@@ -41,6 +41,7 @@
      * @constant {string} ns='http://www.w3.org/2000/svg'
      */
     SVG.ns = 'http://www.w3.org/2000/svg';
+    SVG.xlink = 'http://www.w3.org/1999/xlink';
 
     // Element id sequence
     var did = 1000;
@@ -182,7 +183,8 @@
             width: this.width,
             height: this.height,
             version: "1.1",
-            xmlns: SVG.ns
+            xmlns: SVG.ns,
+            'xmlns:xlink': SVG.xlink
         });
 
         var container = document.getElementById(element);
