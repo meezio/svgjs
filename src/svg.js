@@ -219,7 +219,7 @@
             height: this.height
         });
 
-        observer.trigger("docsized", this.width, this.height);
+        observer.trigger("docsized", this);
         return this;
     };
 
