@@ -33,6 +33,7 @@
      * @property {string} SVG.options.editable.color="#00a8ff" Highlight color for a selected Shape.
      * @property {boolean} SVG.options.editable.rotate=true Whether the Shape can be rotated or not.
      * @property {boolean} SVG.options.editable.move=true Whether the Shape can be moved or not.
+     * @property {boolean} SVG.options.editable.preserveAspectRatio=true Whether resizing from corners preserve aspect ratio or not.
      * @property {boolean} SVG.options.editable.resizeNW=true If the Shape can be resize in both north and west directions.
      * @property {boolean} SVG.options.editable.resizeNE=true If the Shape can be resize in both north and east directions.
      * @property {boolean} SVG.options.editable.resizeSE=true If the Shape can be resize in both south and east directions.
@@ -57,6 +58,7 @@
         color: "#00a8ff",
         rotate: true,
         move: true,
+        preserveAspectRatio: true,
         resizeNW: true,
         resizeNE: true,
         resizeSE: true,
@@ -281,6 +283,9 @@
         };
 
         selection.moveUpLeft = function(deltaX, deltaY, options) {
+            if(options.preserveAspectRatio)
+                deltaX = deltaY;
+
             var frame = selection.firstChild;
             var dim = frame.getBBox();
             var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX);
@@ -309,6 +314,9 @@
         };
 
         selection.moveDownRight = function(deltaX, deltaY, options) {
+            if(options.preserveAspectRatio)
+                deltaX = deltaY;
+
             var frame = selection.firstChild;
             var dim = frame.getBBox();
             var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX);
@@ -335,6 +343,9 @@
         };
 
         selection.moveDownLeft = function(deltaX, deltaY, options) {
+            if(options.preserveAspectRatio)
+                deltaX = -deltaY;
+
             var frame = selection.firstChild;
             var dim = frame.getBBox();
             var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX);
@@ -362,6 +373,9 @@
         };
 
         selection.moveUpRight = function(deltaX, deltaY, options) {
+            if(options.preserveAspectRatio)
+                deltaX = -deltaY;
+
             var frame = selection.firstChild;
             var dim = frame.getBBox();
             var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX);
