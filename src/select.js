@@ -282,9 +282,9 @@
             return null;
         };
 
-        selection.moveUpLeft = function(deltaX, deltaY, options) {
+        selection.moveUpLeft = function(deltaX, deltaY, options, aspectRatio) {
             if(options.preserveAspectRatio)
-                deltaX = deltaY;
+                deltaX = deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
@@ -313,9 +313,9 @@
             return null;
         };
 
-        selection.moveDownRight = function(deltaX, deltaY, options) {
+        selection.moveDownRight = function(deltaX, deltaY, options, aspectRatio) {
             if(options.preserveAspectRatio)
-                deltaX = deltaY;
+                deltaX = deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
@@ -342,9 +342,9 @@
             return null;
         };
 
-        selection.moveDownLeft = function(deltaX, deltaY, options) {
+        selection.moveDownLeft = function(deltaX, deltaY, options, aspectRatio) {
             if(options.preserveAspectRatio)
-                deltaX = -deltaY;
+                deltaX = -deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
@@ -372,9 +372,9 @@
             return null;
         };
 
-        selection.moveUpRight = function(deltaX, deltaY, options) {
+        selection.moveUpRight = function(deltaX, deltaY, options, aspectRatio) {
             if(options.preserveAspectRatio)
-                deltaX = -deltaY;
+                deltaX = -deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();

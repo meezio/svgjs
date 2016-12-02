@@ -67,45 +67,47 @@
     observer.on("resizeSVGShape", function(shape, selection, type, deltaX, deltaY) {
         var newBox = null;
         var opt = shape.editableOptions;
+        var shapeBox = shape.node.getBBox();
+        var aspectRatio = shapeBox.width / shapeBox.height;
 
         switch(type) {
         case "top":
-            if((newBox = selection.moveUp(deltaY, opt))) {
+            if((newBox = selection.moveUp(deltaY, opt, aspectRatio))) {
                 shape.place(0, newBox.y, 0, 0);
             }
             break;
         case "bottom":
-            if((newBox = selection.moveDown(deltaY, opt))) {
+            if((newBox = selection.moveDown(deltaY, opt, aspectRatio))) {
                 shape.place(0, 0, 0, newBox.y + newBox.height);
             }
             break;
         case "left":
-            if((newBox = selection.moveLeft(deltaX, opt))) {
+            if((newBox = selection.moveLeft(deltaX, opt, aspectRatio))) {
                 shape.place(newBox.x, 0, 0, 0);
             }
             break;
         case "right":
-            if((newBox = selection.moveRight(deltaX, opt))) {
+            if((newBox = selection.moveRight(deltaX, opt, aspectRatio))) {
                 shape.place(0, 0, newBox.x + newBox.width, 0);
             }
             break;
         case "topLeft":
-            if((newBox = selection.moveUpLeft(deltaX, deltaY, opt))) {
+            if((newBox = selection.moveUpLeft(deltaX, deltaY, opt, aspectRatio))) {
                 shape.place(newBox.x, newBox.y, 0, 0);
             }
             break;
         case "topRight":
-            if((newBox = selection.moveUpRight(deltaX, deltaY, opt))) {
+            if((newBox = selection.moveUpRight(deltaX, deltaY, opt, aspectRatio))) {
                 shape.place(0, newBox.y, newBox.x + newBox.width, 0);
             }
             break;
         case "bottomLeft":
-            if((newBox = selection.moveDownLeft(deltaX, deltaY, opt))) {
+            if((newBox = selection.moveDownLeft(deltaX, deltaY, opt, aspectRatio))) {
                 shape.place(newBox.x, 0, 0, newBox.y + newBox.height);
             }
             break;
         case "bottomRight":
-            if((newBox = selection.moveDownRight(deltaX, deltaY, opt))) {
+            if((newBox = selection.moveDownRight(deltaX, deltaY, opt, aspectRatio))) {
                 shape.place(0, 0, newBox.x + newBox.width, newBox.y + newBox.height);
             }
             break;
