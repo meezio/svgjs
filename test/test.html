@@ -18,7 +18,8 @@
   (function(SVG) {
     SVG.options.editable.color = "#A8299D"; 
 
-    var doc = new SVG.Document("drawing").size(1200, 800);
+    var doc = new SVG.Document("drawing").size(1000, 800);
+    doc.node.attr({viewBox: '-50 -50 500 400'});
 
     var mbox = new SVG.Meeziobox(150, 80, "HelloI wPrlp");
     var circle = new SVG.Circle(200, 40, 30).move(300, 200).size(150);

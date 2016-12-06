@@ -71,12 +71,12 @@
     };
 
     observer.on("selectSVGShape", function(shape) {
-        removeSelection();
+        SVG.removeSelection();
         if(shape.isEditable) drawSelection.call(shape);
     });
 
     observer.on("selectSVGDoc", function() {
-        removeSelection();
+        SVG.removeSelection();
     });
 
     /**
@@ -97,13 +97,13 @@
 
     /**
      * Remove the selection highlight from the Shape and unbind edit events.
-     * @private
+     * @memberof SVG
      */
-    function removeSelection() {
+    SVG.removeSelection = function() {
         var node = document.querySelector(".SVGselection");
 
         if(node) node.parentNode.removeChild(node);
-    }
+    };
 
     /**
      * Draw a selection highlight around the Shape and bind to edit events.
@@ -121,17 +121,42 @@
             style: "shape-rendering:crispEdges;" // Désactive antialiasing
         });
 
+        var scale = 1;
+        // set scale different from 1 if viewBox is set and Aapect ratio preserved
+        var vb = svgDoc.getAttribute('viewBox');
+        if(vb) {
+            vb = vb.split(' ');
+            var w = parseInt(vb[2], 10);
+            var h = parseInt(vb[3], 10);
+            var bound = svgDoc.getBoundingClientRect();
+            var scaleX = bound.width / w;
+            var scaleY = bound.height / h;
+
+            if(scaleX === scaleY) {
+                scale = scaleX;
+                selection.attr({
+                    transform: 'scale(' + (1 / scale) + ', ' + (1 / scale) + ')'
+                });
+                box.width *= scale;
+                box.height *= scale;
+                box.x *= scale;
+                box.y *= scale;
+            }
+            else
+                scale = 1;
+        }
+
         // Drawing & Events binding
-        selection.appendChild(drawFrame.call(this, box, options));
-        if(options.rotate) selection.appendChild(drawRotateHandle.call(this, box.x + box.width / 2, box.y, options));
-        if(options.resizeNW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y, "nwse-resize", options, 'topLeft'));
-        if(options.resizeNE) selection.appendChild(drawResizeHandle.call(this, box.x + box.width, box.y, "nesw-resize", options, 'topRight'));
-        if(options.resizeSW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y + box.height, "nesw-resize", options, 'bottomLeft'));
-        if(options.resizeSE) selection.appendChild(drawResizeHandle.call(this, box.x + box.width, box.y + box.height, "nwse-resize", options, 'bottomRight'));
-        if(options.resizeN) selection.appendChild(drawResizeHandle.call(this, box.x + box.width / 2, box.y, "ns-resize", options, 'top'));
-        if(options.resizeE) selection.appendChild(drawResizeHandle.call(this, box.x + box.width, box.y + box.height / 2, "ew-resize", options, 'right'));
-        if(options.resizeS) selection.appendChild(drawResizeHandle.call(this, box.x + box.width / 2, box.y + box.height, "ns-resize", options, 'bottom'));
-        if(options.resizeW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y + box.height / 2, "ew-resize", options, 'left'));
+        selection.appendChild(drawFrame.call(this, box, options, scale));
+        if(options.rotate) selection.appendChild(drawRotateHandle.call(this, box.x + box.width / 2, box.y, options, scale));
+        if(options.resizeNW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y, "nwse-resize", options, 'topLeft', scale));
+        if(options.resizeNE) selection.appendChild(drawResizeHandle.call(this, box.x + box.width, box.y, "nesw-resize", options, 'topRight', scale));
+        if(options.resizeSW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y + box.height, "nesw-resize", options, 'bottomLeft', scale));
+        if(options.resizeSE) selection.appendChild(drawResizeHandle.call(this, box.x + box.width, box.y + box.height, "nwse-resize", options, 'bottomRight', scale));
+        if(options.resizeN) selection.appendChild(drawResizeHandle.call(this, box.x + box.width / 2, box.y, "ns-resize", options, 'top', scale));
+        if(options.resizeE) selection.appendChild(drawResizeHandle.call(this, box.x + box.width, box.y + box.height / 2, "ew-resize", options, 'right', scale));
+        if(options.resizeS) selection.appendChild(drawResizeHandle.call(this, box.x + box.width / 2, box.y + box.height, "ns-resize", options, 'bottom', scale));
+        if(options.resizeW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y + box.height / 2, "ew-resize", options, 'left', scale));
 
         /**
          * Test if a resize action try to exceed right boundary.
@@ -140,15 +165,16 @@
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaX The ordinate offset.
+         * @param {float} scale The  scale factor.
          * @return {boolean} Whether the Shape exceed the right boundaries.
          */
-        function isOutEastBoundary(dim, maxBox, minBox, deltaX) {
+        function isOutEastBoundary(dim, maxBox, minBox, deltaX, scale) {
             var ret = false;
 
             if(maxBox && deltaX > 0)
-                ret = dim.x + dim.width > maxBox.x + maxBox.w;
+                ret = dim.x + dim.width > maxBox.x * scale + maxBox.w * scale;
             else if(minBox && deltaX < 0)
-                ret = dim.x + dim.width < minBox.x + minBox.w;
+                ret = dim.x + dim.width < minBox.x * scale + minBox.w * scale;
             return ret;
         }
 
@@ -159,15 +185,16 @@
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaX The ordinate offset.
+         * @param {float} scale The  scale factor.
          * @return {boolean} Whether the Shape exceed the left boundaries.
          */
-        function isOutWestBoundary(dim, maxBox, minBox, deltaX) {
+        function isOutWestBoundary(dim, maxBox, minBox, deltaX, scale) {
             var ret = false;
 
             if(maxBox && deltaX < 0)
-                ret = dim.x < maxBox.x;
+                ret = dim.x < maxBox.x * scale;
             else if(minBox && deltaX > 0)
-                ret = dim.x > minBox.x;
+                ret = dim.x > minBox.x * scale;
             return ret;
         }
 
@@ -178,15 +205,16 @@
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaY The ordinate offset.
+         * @param {float} scale The  scale factor.
          * @return {boolean} Whether the Shape exceed the bottom boundaries.
          */
-        function isOutSouthBoundary(dim, maxBox, minBox, deltaY) {
+        function isOutSouthBoundary(dim, maxBox, minBox, deltaY, scale) {
             var ret = false;
 
             if(maxBox && deltaY > 0)
-                ret = dim.y + dim.height > maxBox.y + maxBox.h;
+                ret = dim.y + dim.height > maxBox.y * scale + maxBox.h * scale;
             else if(minBox && deltaY < 0)
-                ret = dim.y + dim.height < minBox.y + minBox.h;
+                ret = dim.y + dim.height < minBox.y * scale + minBox.h * scale;
             return ret;
         }
 
@@ -197,22 +225,23 @@
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaY The ordinate offset.
+         * @param {float} scale The  scale factor.
          * @return {boolean} Whether the Shape exceed the top boundaries.
          */
-        function isOutNorthBoundary(dim, maxBox, minBox, deltaY) {
+        function isOutNorthBoundary(dim, maxBox, minBox, deltaY, scale) {
             var ret = false;
 
             if(maxBox && deltaY < 0)
-                ret = dim.y < maxBox.y;
+                ret = dim.y < maxBox.y * scale;
             else if(minBox && deltaY > 0)
-                ret = dim.y > minBox.y;
+                ret = dim.y > minBox.y * scale;
             return ret;
         }
 
-        selection.moveDown = function(deltaY, options) {
+        selection.moveDown = function(deltaY, options, scale) {
             var frame = this.firstChild;
             var dim = frame.getBBox();
-            var notOutSouth = !isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY);
+            var notOutSouth = !isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
 
             if(dim.height + deltaY > 0 && deltaY !== 0 && notOutSouth) {
                 frame.setAttribute('height', dim.height + deltaY);
@@ -226,10 +255,10 @@
             return null;
         };
 
-        selection.moveRight = function(deltaX, options) {
+        selection.moveRight = function(deltaX, options, scale) {
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var notOutEast = !isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX);
+            var notOutEast = !isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
 
             if(dim.width + deltaX > 0 && deltaX !== 0 && notOutEast) {
                 frame.setAttribute('width', dim.width + deltaX);
@@ -244,10 +273,10 @@
             return null;
         };
 
-        selection.moveUp = function(deltaY, options) {
+        selection.moveUp = function(deltaY, options, scale) {
             var frame = this.firstChild;
             var dim = frame.getBBox();
-            var notOutNorth = !isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY);
+            var notOutNorth = !isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
 
             if(dim.height - deltaY > 0 && deltaY !== 0 && notOutNorth) {
                 frame.setAttribute('y', dim.y + deltaY);
@@ -263,10 +292,10 @@
             return null;
         };
 
-        selection.moveLeft = function(deltaX, options) {
+        selection.moveLeft = function(deltaX, options, scale) {
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var notOutWest = !isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX);
+            var notOutWest = !isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
 
             if(dim.width - deltaX > 0 && deltaX !== 0 && notOutWest) {
                 frame.setAttribute('x', dim.x + deltaX);
@@ -282,19 +311,19 @@
             return null;
         };
 
-        selection.moveUpLeft = function(deltaX, deltaY, options, aspectRatio) {
+        selection.moveUpLeft = function(deltaX, deltaY, options, aspectRatio, scale) {
             if(options.preserveAspectRatio)
                 deltaX = deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX);
-            var outNorth = isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY);
+            var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
+            var outNorth = isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
 
             if((deltaY !== 0 && dim.height - deltaY > 0 && !outNorth) && (deltaX === 0 || dim.width - deltaX <= 0 || outWest))
-                return this.moveUp(deltaY, options);
+                return this.moveUp(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width - deltaX > 0 && !outWest) && (deltaY === 0 || dim.height - deltaY <= 0 || outNorth))
-                return this.moveLeft(deltaX, options);
+                return this.moveLeft(deltaX, options, scale);
             else if(dim.width - deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outWest && !outNorth) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
@@ -313,19 +342,19 @@
             return null;
         };
 
-        selection.moveDownRight = function(deltaX, deltaY, options, aspectRatio) {
+        selection.moveDownRight = function(deltaX, deltaY, options, aspectRatio, scale) {
             if(options.preserveAspectRatio)
                 deltaX = deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX);
-            var outSouth = isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY);
+            var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
+            var outSouth = isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
 
             if((deltaY !== 0 && dim.height + deltaY > 0 && !outSouth) && (deltaX === 0 || dim.width + deltaX <= 0 || outEast))
-                return this.moveDown(deltaY, options);
+                return this.moveDown(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width + deltaX > 0 && !outEast) && (deltaY === 0 || dim.height + deltaY <= 0 || outSouth))
-                return this.moveRight(deltaX, options);
+                return this.moveRight(deltaX, options, scale);
             else if(dim.width + deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outEast && !outSouth) {
                 frame.setAttribute('height', dim.height + deltaY);
                 frame.setAttribute('width', dim.width + deltaX);
@@ -342,19 +371,19 @@
             return null;
         };
 
-        selection.moveDownLeft = function(deltaX, deltaY, options, aspectRatio) {
+        selection.moveDownLeft = function(deltaX, deltaY, options, aspectRatio, scale) {
             if(options.preserveAspectRatio)
                 deltaX = -deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX);
-            var outSouth = isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY);
+            var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
+            var outSouth = isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
 
             if((deltaY !== 0 && dim.height + deltaY > 0 && !outSouth) && (deltaX === 0 || dim.width - deltaX <= 0 || outWest))
-                return this.moveDown(deltaY, options);
+                return this.moveDown(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width - deltaX > 0 && !outWest) && (deltaY === 0 || dim.height + deltaY <= 0 || outSouth))
-                return this.moveLeft(deltaX, options);
+                return this.moveLeft(deltaX, options, scale);
             else if(dim.width - deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outWest && !outSouth) {
                 frame.setAttribute('x', dim.x + deltaX);
                 frame.setAttribute('width', dim.width - deltaX);
@@ -372,19 +401,19 @@
             return null;
         };
 
-        selection.moveUpRight = function(deltaX, deltaY, options, aspectRatio) {
+        selection.moveUpRight = function(deltaX, deltaY, options, aspectRatio, scale) {
             if(options.preserveAspectRatio)
                 deltaX = -deltaY * aspectRatio;
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX);
-            var outNorth = isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY);
+            var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
+            var outNorth = isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
 
             if((deltaY !== 0 && dim.height - deltaY > 0 && !outNorth) && (deltaX === 0 || dim.width + deltaX <= 0 || outEast))
-                return this.moveUp(deltaY, options);
+                return this.moveUp(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width + deltaX > 0 && !outEast) && (deltaY === 0 || dim.height - deltaY <= 0 || outNorth))
-                return this.moveRight(deltaX, options);
+                return this.moveRight(deltaX, options, scale);
             else if(dim.width + deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outEast && !outNorth) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
@@ -433,9 +462,10 @@
      * @private
      * @param {object} box Location and size of the selection. See [SVGRect]{@link https://www.w3.org/TR/SVG/types.html#InterfaceSVGRect}
      * @param {object} options The editable options for the Shape.
+     * @param {float} scale The  scale factor.
      * @return {object} The SVG selection frame.
      */
-    function drawFrame(box, options) {
+    function drawFrame(box, options, scale) {
         var _this = this;
         // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF < v39)
         var initPositionX = 0;
@@ -448,21 +478,23 @@
             height: box.height,
             fill: 'none',
             stroke: options.color,
-            'stroke-width': "1px",
+            'stroke-width': 1,
             'stroke-dasharray': "3 2",
             'pointer-events': "fill"
         });
 
         if(options.move) {
             frame.attr({style: "cursor: move;"});
-
+            console.log('##########');
             // Bind/unbind event on handle and trigger moveSVGShape to observer
             frame.onmousedown = function(ev) {
+                console.log('$$$$$$$$$$$$$$');
                 initPositionX = ev.clientX;
                 initPositionY = ev.clientY;
                 disableSelection();
                 window.addEventListener("mousemove", onmove);
                 window.addEventListener("mouseup", function() {
+                    console.log('mouseup');
                     window.removeEventListener("mousemove", onmove);
                     enableSelection();
                 });
@@ -501,8 +533,9 @@
              * @param {object} selection The selection SVG groupe node.
              * @param {number} deltaX The abscissa displacement offset.
              * @param {number} deltaY The ordinate displacement offset.
+             * @param {float} scale The  scale factor.
              */
-            observer.trigger("moveSVGShape", _this, frame.parentNode, ev.clientX - initPositionX, ev.clientY - initPositionY);
+            observer.trigger("moveSVGShape", _this, frame.parentNode, ev.clientX - initPositionX, ev.clientY - initPositionY, scale);
             initPositionY = ev.clientY;
             initPositionX = ev.clientX;
         }
@@ -518,9 +551,10 @@
      * @param {string} cursor CSS cursor style.
      * @param {object} options The editable options for the Shape.
      * @param {string} type Type of resize (top, bottom, leftTop,...).
+     * @param {float} scale The  scale factor.
      * @return {object} The SVG resize handle.
      */
-    function drawResizeHandle(x, y, cursor, options, type) {
+    function drawResizeHandle(x, y, cursor, options, type, scale) {
         var _this = this;
         // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF < v39)
         var initPositionX = 0;
@@ -586,7 +620,7 @@
         function onresize(ev) {
             /**
              * This event is fire when a SVG Shape is resizing.
-             * @example observer.on("resizeSVGShape", function(shape, selection, type, deltaX, deltaY) {
+             * @example observer.on("resizeSVGShape", function(shape, selection, type, deltaX, deltaY, scale) {
              *     ...
              * });
              *
@@ -596,8 +630,9 @@
              * @param {string} type The type of resizing. Can be 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft' or 'bottomRight'.
              * @param {number} deltaX The abscissa displacement offset.
              * @param {number} deltaY The ordinate displacement offset.
+             * @param {float} scale The  scale factor.
              */
-            observer.trigger("resizeSVGShape", _this, point.parentNode, type, ev.clientX - initPositionX, ev.clientY - initPositionY);
+            observer.trigger("resizeSVGShape", _this, point.parentNode, type, ev.clientX - initPositionX, ev.clientY - initPositionY, scale);
             initPositionY = ev.clientY;
             initPositionX = ev.clientX;
         }
@@ -611,9 +646,10 @@
      * @param {number} x The abscissa of the handle.
      * @param {number} y The ordinate of the handle.
      * @param {object} options The editable options for the Shape.
+     * @param {float} scale The  scale factor.
      * @return {object} The SVG rotage handle.
      */
-    function drawRotateHandle(x, y, options) {
+    function drawRotateHandle(x, y, options, scale) {
         var _this = this;
         // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF < v39)
         var initPositionX = 0;
@@ -681,8 +717,9 @@
              * @param {object} selection The selection SVG groupe node.
              * @param {number} deltaX The abscissa displacement offset.
              * @param {number} deltaY The ordinate displacement offset.
+             * @param {float} scale The  scale factor.
              */
-            observer.trigger("rotateSVGShape", _this, point.parentNode, ev.clientX - initPositionX, ev.clientY - initPositionY);
+            observer.trigger("rotateSVGShape", _this, point.parentNode, ev.clientX - initPositionX, ev.clientY - initPositionY, scale);
             initPositionY = ev.clientY;
             initPositionX = ev.clientX;
         }
