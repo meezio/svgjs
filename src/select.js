@@ -485,10 +485,8 @@
 
         if(options.move) {
             frame.attr({style: "cursor: move;"});
-            console.log('##########', frame);
             // Bind/unbind event on handle and trigger moveSVGShape to observer
             frame.onmousedown = function(ev) {
-                console.log('$$$$$$$$$$$$$$');
                 initPositionX = ev.clientX;
                 initPositionY = ev.clientY;
                 disableSelection();
@@ -533,6 +531,11 @@
             initPositionX = ev.clientX;
         }
 
+        /**
+         * Function call when mouse up or touch end aka stop to move a shape. It trigger a resizedMovedEnd event.
+         * @private
+         * @param {event} ev The move event (mouse or touch).
+         */
         function onmoveEnd(ev) {
             window.removeEventListener("touchmove", onmove);
             window.removeEventListener("mousemove", onmove);
@@ -599,19 +602,13 @@
             initPositionY = ev.clientY;
             disableSelection();
             window.addEventListener("mousemove", onresize);
-            window.addEventListener("mouseup", function() {
-                window.removeEventListener("mousemove", onresize);
-                enableSelection();
-            });
+            window.addEventListener("mouseup", onresizeEnd);
         };
 
         point.ontouchstart = function(ev) {
             disableSelection();
             window.addEventListener("touchmove", onresize);
-            window.addEventListener("touchend", function() {
-                window.removeEventListener("touchmove", onresize);
-                enableSelection();
-            });
+            window.addEventListener("touchend", onresizeEnd);
         };
 
         /**
@@ -637,6 +634,20 @@
             observer.trigger("resizeSVGShape", _this, point.parentNode, type, ev.clientX - initPositionX, ev.clientY - initPositionY, scale);
             initPositionY = ev.clientY;
             initPositionX = ev.clientX;
+        }
+
+        /**
+         * Function call when mouse up or touch end aka stop to resizing shape. It trigger a resizedMovedEnd event.
+         * @private
+         * @param {event} ev The move event (mouse or touch).
+         */
+        function onresizeEnd(ev) {
+            window.removeEventListener("touchmove", onresize);
+            window.removeEventListener("mousemove", onresize);
+            window.removeEventListener("mouseup", onresizeEnd);
+            window.removeEventListener("touchend", onresizeEnd);
+            observer.trigger("resizedMovedEnd");
+            enableSelection();
         }
 
         return point;
@@ -690,19 +701,13 @@
             initPositionY = ev.clientY;
             disableSelection();
             window.addEventListener("mousemove", onrotate);
-            window.addEventListener("mouseup", function() {
-                window.removeEventListener("mousemove", onrotate);
-                enableSelection();
-            });
+            window.addEventListener("mouseup", onrotateEnd);
         };
 
         point.ontouchstart = function(ev) {
             disableSelection();
             window.addEventListener("touchmove", onrotate);
-            window.addEventListener("touchend", function() {
-                window.removeEventListener("touchmove", onrotate);
-                enableSelection();
-            });
+            window.addEventListener("touchend", onrotateEnd);
         };
 
         /**
@@ -724,6 +729,20 @@
             observer.trigger("rotateSVGShape", _this, point.parentNode, ev.clientX - initPositionX, ev.clientY - initPositionY, scale);
             initPositionY = ev.clientY;
             initPositionX = ev.clientX;
+        }
+
+        /**
+         * Function call when mouse up or touch end aka stop to rotate shape. It trigger a resizedMovedEnd event.
+         * @private
+         * @param {event} ev The move event (mouse or touch).
+         */
+        function onrotateEnd(ev) {
+            window.removeEventListener("touchmove", onrotate);
+            window.removeEventListener("mousemove", onrotate);
+            window.removeEventListener("mouseup", onrotateEnd);
+            window.removeEventListener("touchend", onrotateEnd);
+            observer.trigger("resizedMovedEnd");
+            enableSelection();
         }
 
         return point;
