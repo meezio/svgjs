@@ -485,7 +485,7 @@
 
         if(options.move) {
             frame.attr({style: "cursor: move;"});
-            console.log('##########');
+            console.log('##########', frame);
             // Bind/unbind event on handle and trigger moveSVGShape to observer
             frame.onmousedown = function(ev) {
                 console.log('$$$$$$$$$$$$$$');
@@ -493,20 +493,13 @@
                 initPositionY = ev.clientY;
                 disableSelection();
                 window.addEventListener("mousemove", onmove);
-                window.addEventListener("mouseup", function() {
-                    console.log('mouseup');
-                    window.removeEventListener("mousemove", onmove);
-                    enableSelection();
-                });
+                window.addEventListener("mouseup", onmoveEnd);
             };
 
             frame.ontouchstart = function(ev) {
                 disableSelection();
                 window.addEventListener("touchmove", onmove);
-                window.addEventListener("touchend", function() {
-                    window.removeEventListener("touchmove", onmove);
-                    enableSelection();
-                });
+                window.addEventListener("touchend", onmoveEnd);
             };
         }
 
@@ -538,6 +531,15 @@
             observer.trigger("moveSVGShape", _this, frame.parentNode, ev.clientX - initPositionX, ev.clientY - initPositionY, scale);
             initPositionY = ev.clientY;
             initPositionX = ev.clientX;
+        }
+
+        function onmoveEnd(ev) {
+            window.removeEventListener("touchmove", onmove);
+            window.removeEventListener("mousemove", onmove);
+            window.removeEventListener("mouseup", onmoveEnd);
+            window.removeEventListener("touchend", onmoveEnd);
+            observer.trigger("resizedMovedEnd");
+            enableSelection();
         }
 
         return frame;
