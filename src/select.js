@@ -111,9 +111,12 @@
      * @param {SVG.Shape} shape The SVG Shape to select.
      */
     SVG.setSelection = function(shape) {
-        SVG.selectedShape = shape;
         SVG.removeSelection();
-        if(shape.isEditable) drawSelection.call(shape);
+
+        if(shape.isEditable) {
+            SVG.selectedShape = shape;
+            drawSelection.call(shape);
+        }
     };
 
     /**
