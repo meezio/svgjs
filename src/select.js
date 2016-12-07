@@ -117,8 +117,9 @@
     };
 
     /**
+     * The current selected shape.
      * @memberof SVG
-     * @variable {SVG.Shape} The current selected shape
+     * @type {SVG.Shape}
      */
     SVG.selectedShape = null;
 
