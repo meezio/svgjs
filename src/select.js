@@ -102,6 +102,14 @@
         var node = document.querySelector(".SVGselection");
 
         if(node) node.parentNode.removeChild(node);
+
+        /**
+         * This event is fire when a SVG Shape is deselected.
+         *
+         * @event SVG.Shape#deselectSVGShape
+         * @param {SVG.Shape} shape The deselected SVG Shape.
+         */
+        observer.trigger("deselectSVGShape", SVG.selectedShape);
         SVG.selectedShape = null;
     };
 
