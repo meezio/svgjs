@@ -153,7 +153,7 @@
             var scaleX = bound.width / w;
             var scaleY = bound.height / h;
 
-            if(scaleX === scaleY) {
+            if(Math.round(scaleX / scaleY * 1000) === 1000) {
                 scale = scaleX;
                 selection.attr({
                     transform: 'scale(' + (1 / scale) + ', ' + (1 / scale) + ')'
