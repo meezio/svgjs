@@ -71,8 +71,7 @@
     };
 
     observer.on("selectSVGShape", function(shape) {
-        SVG.removeSelection();
-        if(shape.isEditable) drawSelection.call(shape);
+        SVG.setSelection(shape);
     });
 
     observer.on("selectSVGDoc", function() {
@@ -103,7 +102,25 @@
         var node = document.querySelector(".SVGselection");
 
         if(node) node.parentNode.removeChild(node);
+        SVG.selectedShape = null;
     };
+
+    /**
+     * Select a SVG shape and bind edit events.
+     * @memberof SVG
+     * @param {SVG.Shape} shape The SVG Shape to select.
+     */
+    SVG.setSelection = function(shape) {
+        SVG.selectedShape = shape;
+        SVG.removeSelection();
+        if(shape.isEditable) drawSelection.call(shape);
+    };
+
+    /**
+     * @memberof SVG
+     * @variable {SVG.Shape} The current selected shape
+     */
+    SVG.selectedShape = null;
 
     /**
      * Draw a selection highlight around the Shape and bind to edit events.
