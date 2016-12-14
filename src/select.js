@@ -96,9 +96,10 @@
 
     /**
      * Remove the selection highlight from the Shape and unbind edit events.
+     * @param {boolean} dontRaise=false Whether raise 'deselectSVGShape' event or not.
      * @memberof SVG
      */
-    SVG.removeSelection = function() {
+    SVG.removeSelection = function(dontRaise) {
         var node = document.querySelector(".SVGselection");
 
         if(node) node.parentNode.removeChild(node);
@@ -109,7 +110,7 @@
          * @event SVG.Shape#deselectSVGShape
          * @param {SVG.Shape} shape The deselected SVG Shape.
          */
-        observer.trigger("deselectSVGShape", SVG.selectedShape);
+        if(!dontRaise) observer.trigger("deselectSVGShape", SVG.selectedShape);
         SVG.selectedShape = null;
     };
 
@@ -119,7 +120,7 @@
      * @param {SVG.Shape} shape The SVG Shape to select.
      */
     SVG.setSelection = function(shape) {
-        SVG.removeSelection();
+        SVG.removeSelection(true);
 
         if(shape.isEditable) {
             SVG.selectedShape = shape;
