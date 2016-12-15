@@ -142,7 +142,12 @@
      * @return {object} The selection highlight object.
      */
     function drawSelection() {
-        var box = this.node.getBBox();
+        var tmp = this.node.getBBox();
+        var box = {};
+        box.x = tmp.x;
+        box.y = tmp.y;
+        box.width = tmp.width;
+        box.height = tmp.height;
         var svgDoc = this.node.closest("svg");
         var options = this.editableOptions;
 
