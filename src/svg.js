@@ -38,7 +38,7 @@
      * SVG Namespace
      * @memberof SVG
      * @constant
-     *  @default
+     * @default
      */
     SVG.ns = 'http://www.w3.org/2000/svg';
 
@@ -46,9 +46,17 @@
      * XLink namespace
      * @memberof SVG
      * @constant
-     *  @default
+     * @default
      */
     SVG.xlink = 'http://www.w3.org/1999/xlink';
+
+    /**
+     * XHTML namespace
+     * @memberof SVG
+     * @constant
+     * @default
+     */
+    SVG.xhtml = 'http://www.w3.org/1999/xhtml';
 
     // Element id sequence
     var did = 1000;
@@ -64,10 +72,12 @@
      * @memberof SVG
      * @param {string} name Name of the SVG element to create.
      * @param {object} [attrs={}] SVG attribute for the element.
+     * @param {string} [namespace='http://www.w3.org/2000/svg'] Element namespace.
      * @return {object} The SVG element created.
      */
-    SVG.element = function(name, attrs) {
-        var node = document.createElementNS(SVG.ns, name);
+    SVG.element = function(name, attrs, namespace) {
+        namespace = namespace || SVG.ns;
+        var node = document.createElementNS(namespace, name);
 
         attrs = attrs || {};
 

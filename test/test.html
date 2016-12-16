@@ -11,21 +11,30 @@
     <script src="../src/edit.js"></script>
     <script src="js/circle.js"></script>
     <script src="js/box.js"></script>
+    <script src="js/div.js"></script>
+    <script
+	    src="https://code.jquery.com/jquery-2.2.4.min.js"
+	    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+		crossorigin="anonymous"></script>
+    <script src="html2canvas.js" type="text/javascript"></script>
 </head>
 <body>
   <div id="drawing"></div>
+  <div id="previewImage">
   <script type="text/javascript">
   (function(SVG) {
     SVG.options.editable.color = "#A8299D"; 
 
-    var doc = new SVG.Document("drawing").size(1000, 800);
+    var doc = new SVG.Document("drawing").size(500, 400);
     doc.node.attr({viewBox: '-50 -50 500 400'});
 
     var mbox = new SVG.Meeziobox(150, 80, "HelloI wPrlp");
+    var dbox = new SVG.Divbox(250, 130, "HelloI wPrlp");
     var circle = new SVG.Circle(200, 40, 30).move(300, 200).size(150);
 
     doc.add(circle);
     doc.add(mbox);
+    doc.add(dbox);
 
     mbox.size(200, 120);
     mbox.move(50, 150);
@@ -40,7 +49,25 @@
         editText: true
     });
 
-    SVG.setSelection(circle);
+    SVG.setSelection(circle);    
+
+    function HtmlToImg(id, mimetype) {
+        mimetype = mimetype || "image/png";
+
+        html2canvas($('#' + id), {
+            onrendered: function (canvas) {
+                observer.trigger(id + 'Exported', canvas.toDataURL(mimetype));
+                // $('body').append(canvas);
+                $('body').append('<a download="fichier.png" href="' + canvas.toDataURL(mimetype) + '">Link</a>');
+            }
+        });
+    }
+
+    observer.on('backgroundExported', function(data){
+        console.log(data)
+    });
+
+    HtmlToImg('background');
   })(MeezioSVG);
   </script>
 
