@@ -34,13 +34,15 @@
         });
         // this.node.g = {};
 
-        var body = SVG.element("body", {
+        /* var body = SVG.element("body", {
             style: 'margin:0',
             xmlns: SVG.xhtml
-        }, SVG.xhtml);
+        }, SVG.xhtml); */
 
-        body.innerHTML = '<div style="background-color:blue;width:250px;height:130px" id="background"><p style="margin:0">Hello <span style="color:white;font-size:1.5em">world</span>!</p></div>';
-        this.node.appendChild(body);
+        /* global $ */
+        $('body').append('<div style="display:none;background-color:blue;width:250px;height:130px" id="background"><p style="margin:0">Hello <span style="color:white;font-size:1.5em">world</span>!</p></div>');
+        // body.innerHTML = '<div style="background-color:blue;width:250px;height:130px" id="background"><p style="margin:0">Hello <span style="color:white;font-size:1.5em">world</span>!</p></div>';
+        // this.node.appendChild(body);
     };
 
     SVG.Divbox.prototype.size = function(width, height) {

@@ -194,91 +194,127 @@
         if(options.resizeW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y + box.height / 2, "ew-resize", options, 'left', scale));
 
         /**
-         * Test if a resize action try to exceed right boundary.
+         * Adjust deltaX to East boudaries.
          * @private
          * @param {object} dim The dimension of the Shape.
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaX The ordinate offset.
          * @param {float} scale The  scale factor.
-         * @return {boolean} Whether the Shape exceed the right boundaries.
+         * @return {number} Adjusted deltaX.
          */
-        function isOutEastBoundary(dim, maxBox, minBox, deltaX, scale) {
-            var ret = false;
+        function getValidEastOffset(dim, maxBox, minBox, deltaX, scale) {
+            var ret = deltaX;
 
-            if(maxBox && deltaX > 0)
-                ret = dim.x + dim.width > maxBox.x * scale + maxBox.w * scale;
-            else if(minBox && deltaX < 0)
-                ret = dim.x + dim.width < minBox.x * scale + minBox.w * scale;
+            if(maxBox && deltaX > 0) {
+                if(dim.x + dim.width > (maxBox.x + maxBox.w) * scale)
+                    ret = 0;
+                else
+                    ret = (dim.x + dim.width + deltaX > (maxBox.x + maxBox.w) * scale ? (maxBox.x + maxBox.w) * scale - (dim.x + dim.width) : deltaX);
+            }
+            else if(minBox && deltaX < 0) {
+                if(dim.x + dim.width < (minBox.x + minBox.w) * scale)
+                    ret = 0;
+                else
+                    ret = (dim.x + dim.width + deltaX < (minBox.x + minBox.w) * scale ? (minBox.x + minBox.w) * scale - (dim.x + dim.width) : deltaX);
+            }
+
             return ret;
         }
 
         /**
-         * Test if a resize action try to exceed left boundary.
+         * Adjust deltaX to West boudaries.
          * @private
          * @param {object} dim The dimension of the Shape.
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaX The ordinate offset.
          * @param {float} scale The  scale factor.
-         * @return {boolean} Whether the Shape exceed the left boundaries.
+         * @return {number} Adjusted deltaX.
          */
-        function isOutWestBoundary(dim, maxBox, minBox, deltaX, scale) {
-            var ret = false;
+        function getValidWestOffset(dim, maxBox, minBox, deltaX, scale) {
+            var ret = deltaX;
 
-            if(maxBox && deltaX < 0)
-                ret = dim.x < maxBox.x * scale;
-            else if(minBox && deltaX > 0)
-                ret = dim.x > minBox.x * scale;
+            if(maxBox && deltaX < 0) {
+                if(dim.x < maxBox.x * scale)
+                    ret = 0;
+                else
+                    ret = (dim.x + deltaX < maxBox.x * scale ? maxBox.x * scale - dim.x : deltaX);
+            }
+            else if(minBox && deltaX > 0) {
+                if(dim.x > minBox.x * scale)
+                    ret = 0;
+                else
+                    ret = (dim.x + deltaX > minBox.x * scale ? minBox.x * scale - dim.x : deltaX);
+            }
+
             return ret;
         }
 
         /**
-         * Test if a resize action try to exceed bottom boundary.
+         * Adjust deltaY to South boudaries.
          * @private
          * @param {object} dim The dimension of the Shape.
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaY The ordinate offset.
          * @param {float} scale The  scale factor.
-         * @return {boolean} Whether the Shape exceed the bottom boundaries.
+         * @return {number} Adjusted deltaY.
          */
-        function isOutSouthBoundary(dim, maxBox, minBox, deltaY, scale) {
-            var ret = false;
+        function getValidSouthOffset(dim, maxBox, minBox, deltaY, scale) {
+            var ret = deltaY;
 
-            if(maxBox && deltaY > 0)
-                ret = dim.y + dim.height > maxBox.y * scale + maxBox.h * scale;
-            else if(minBox && deltaY < 0)
-                ret = dim.y + dim.height < minBox.y * scale + minBox.h * scale;
+            if(maxBox && deltaY > 0) {
+                if(dim.y + dim.height > (maxBox.y + maxBox.h) * scale)
+                    ret = 0;
+                else
+                    ret = (dim.y + dim.height + deltaY > (maxBox.y + maxBox.h) * scale ? (maxBox.y + maxBox.h) * scale - (dim.y + dim.height) : deltaY);
+            }
+            else if(minBox && deltaY < 0) {
+                if(dim.y + dim.height < (minBox.y + minBox.h) * scale)
+                    ret = 0;
+                else
+                    ret = (dim.y + dim.height + deltaY < (minBox.y + minBox.h) * scale ? (minBox.y + minBox.h) * scale - (dim.y + dim.height) : deltaY);
+            }
+
             return ret;
         }
 
         /**
-         * Test if a resize action try to exceed top boundary.
+         * Adjust deltaY to North boudaries.
          * @private
          * @param {object} dim The dimension of the Shape.
          * @param {object} maxBox The maximum boundary of the Shape.
          * @param {object} minBox The minimum boundary of the Shape.
          * @param {object} deltaY The ordinate offset.
          * @param {float} scale The  scale factor.
-         * @return {boolean} Whether the Shape exceed the top boundaries.
+         * @return {number} Adjusted deltaY.
          */
-        function isOutNorthBoundary(dim, maxBox, minBox, deltaY, scale) {
-            var ret = false;
+        function getValidNorthOffset(dim, maxBox, minBox, deltaY, scale) {
+            var ret = deltaY;
 
-            if(maxBox && deltaY < 0)
-                ret = dim.y < maxBox.y * scale;
-            else if(minBox && deltaY > 0)
-                ret = dim.y > minBox.y * scale;
+            if(maxBox && deltaY < 0) {
+                if(dim.y < maxBox.y * scale)
+                    ret = 0;
+                else
+                    ret = (dim.y + deltaY < maxBox.y * scale ? maxBox.y * scale - dim.y : deltaY);
+            }
+            else if(minBox && deltaY > 0) {
+                if(dim.y > minBox.y * scale)
+                    ret = 0;
+                else
+                    ret = (dim.y + deltaY > minBox.y * scale ? minBox.y * scale - dim.y : deltaY);
+            }
+
             return ret;
         }
 
         selection.moveDown = function(deltaY, options, scale) {
             var frame = this.firstChild;
             var dim = frame.getBBox();
-            var notOutSouth = !isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
+            deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if(dim.height + deltaY > 0 && deltaY !== 0 && notOutSouth) {
+            if(dim.height + deltaY > 0 && deltaY !== 0) {
                 frame.setAttribute('height', dim.height + deltaY);
                 this.translateNode(".bottomLeft", 0, deltaY);
                 this.translateNode(".bottom", 0, deltaY);
@@ -293,9 +329,9 @@
         selection.moveRight = function(deltaX, options, scale) {
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var notOutEast = !isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
+            deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
 
-            if(dim.width + deltaX > 0 && deltaX !== 0 && notOutEast) {
+            if(dim.width + deltaX > 0 && deltaX !== 0) {
                 frame.setAttribute('width', dim.width + deltaX);
                 this.translateNode(".topRight", deltaX, 0);
                 this.translateNode(".right", deltaX, 0);
@@ -311,9 +347,9 @@
         selection.moveUp = function(deltaY, options, scale) {
             var frame = this.firstChild;
             var dim = frame.getBBox();
-            var notOutNorth = !isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
+            deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if(dim.height - deltaY > 0 && deltaY !== 0 && notOutNorth) {
+            if(dim.height - deltaY > 0 && deltaY !== 0) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
                 this.translateNode(".topLeft", 0, deltaY);
@@ -330,9 +366,9 @@
         selection.moveLeft = function(deltaX, options, scale) {
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var notOutWest = !isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
+            deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
 
-            if(dim.width - deltaX > 0 && deltaX !== 0 && notOutWest) {
+            if(dim.width - deltaX > 0 && deltaX !== 0) {
                 frame.setAttribute('x', dim.x + deltaX);
                 frame.setAttribute('width', dim.width - deltaX);
                 this.translateNode(".topLeft", deltaX, 0);
@@ -352,14 +388,14 @@
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
-            var outNorth = isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
+            deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
+            deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 && dim.height - deltaY > 0 && !outNorth) && (deltaX === 0 || dim.width - deltaX <= 0 || outWest))
+            if((deltaY !== 0 && dim.height - deltaY > 0) && (deltaX === 0 || dim.width - deltaX <= 0))
                 return this.moveUp(deltaY, options, scale);
-            else if((deltaX !== 0 && dim.width - deltaX > 0 && !outWest) && (deltaY === 0 || dim.height - deltaY <= 0 || outNorth))
+            else if((deltaX !== 0 && dim.width - deltaX > 0) && (deltaY === 0 || dim.height - deltaY <= 0))
                 return this.moveLeft(deltaX, options, scale);
-            else if(dim.width - deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outWest && !outNorth) {
+            else if(dim.width - deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
                 frame.setAttribute('x', dim.x + deltaX);
@@ -383,14 +419,14 @@
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
-            var outSouth = isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
+            deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
+            deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 && dim.height + deltaY > 0 && !outSouth) && (deltaX === 0 || dim.width + deltaX <= 0 || outEast))
+            if((deltaY !== 0 && dim.height + deltaY > 0) && (deltaX === 0 || dim.width + deltaX <= 0))
                 return this.moveDown(deltaY, options, scale);
-            else if((deltaX !== 0 && dim.width + deltaX > 0 && !outEast) && (deltaY === 0 || dim.height + deltaY <= 0 || outSouth))
+            else if((deltaX !== 0 && dim.width + deltaX > 0) && (deltaY === 0 || dim.height + deltaY <= 0))
                 return this.moveRight(deltaX, options, scale);
-            else if(dim.width + deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outEast && !outSouth) {
+            else if(dim.width + deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('height', dim.height + deltaY);
                 frame.setAttribute('width', dim.width + deltaX);
                 this.translateNode(".bottomLeft", 0, deltaY);
@@ -412,14 +448,14 @@
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outWest = isOutWestBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
-            var outSouth = isOutSouthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
+            deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
+            deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 && dim.height + deltaY > 0 && !outSouth) && (deltaX === 0 || dim.width - deltaX <= 0 || outWest))
+            if((deltaY !== 0 && dim.height + deltaY > 0) && (deltaX === 0 || dim.width - deltaX <= 0))
                 return this.moveDown(deltaY, options, scale);
-            else if((deltaX !== 0 && dim.width - deltaX > 0 && !outWest) && (deltaY === 0 || dim.height + deltaY <= 0 || outSouth))
+            else if((deltaX !== 0 && dim.width - deltaX > 0) && (deltaY === 0 || dim.height + deltaY <= 0))
                 return this.moveLeft(deltaX, options, scale);
-            else if(dim.width - deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outWest && !outSouth) {
+            else if(dim.width - deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('x', dim.x + deltaX);
                 frame.setAttribute('width', dim.width - deltaX);
                 frame.setAttribute('height', dim.height + deltaY);
@@ -442,14 +478,14 @@
 
             var frame = selection.firstChild;
             var dim = frame.getBBox();
-            var outEast = isOutEastBoundary(dim, options.maxBox, options.minBox, deltaX, scale);
-            var outNorth = isOutNorthBoundary(dim, options.maxBox, options.minBox, deltaY, scale);
+            deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
+            deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 && dim.height - deltaY > 0 && !outNorth) && (deltaX === 0 || dim.width + deltaX <= 0 || outEast))
+            if((deltaY !== 0 && dim.height - deltaY > 0) && (deltaX === 0 || dim.width + deltaX <= 0))
                 return this.moveUp(deltaY, options, scale);
-            else if((deltaX !== 0 && dim.width + deltaX > 0 && !outEast) && (deltaY === 0 || dim.height - deltaY <= 0 || outNorth))
+            else if((deltaX !== 0 && dim.width + deltaX > 0) && (deltaY === 0 || dim.height - deltaY <= 0))
                 return this.moveRight(deltaX, options, scale);
-            else if(dim.width + deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0 && !outEast && !outNorth) {
+            else if(dim.width + deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
                 frame.setAttribute('width', dim.width + deltaX);
