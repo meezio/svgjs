@@ -71,11 +71,29 @@
     };
 
     observer.on("selectSVGShape", function(shape) {
-        SVG.setSelection(shape);
+        SVG.removeSelection();
+
+        if(shape.isEditable) {
+            SVG.selectedShape = shape;
+            drawSelection.call(shape);
+        }
     });
 
     observer.on("selectSVGDoc", function() {
-        SVG.removeSelection();
+        /**
+         * This event is fire when a SVG Shape is deselected.
+         *
+         * @event SVG.Shape#deselectSVGShape
+         * @param {SVG.Shape} shape The deselected SVG Shape.
+         */
+        observer.trigger("deselectSVGShape", SVG.selectedShape);
+    });
+
+    observer.on("deselectSVGShape", function(shape) {
+        var node = document.querySelector(".SVGselection");
+
+        if(node) node.parentNode.removeChild(node);
+        SVG.selectedShape = null;
     });
 
     /**
@@ -96,22 +114,10 @@
 
     /**
      * Remove the selection highlight from the Shape and unbind edit events.
-     * @param {boolean} dontRaise=false Whether raise 'deselectSVGShape' event or not.
      * @memberof SVG
      */
-    SVG.removeSelection = function(dontRaise) {
-        var node = document.querySelector(".SVGselection");
-
-        if(node) node.parentNode.removeChild(node);
-
-        /**
-         * This event is fire when a SVG Shape is deselected.
-         *
-         * @event SVG.Shape#deselectSVGShape
-         * @param {SVG.Shape} shape The deselected SVG Shape.
-         */
-        if(!dontRaise) observer.trigger("deselectSVGShape", SVG.selectedShape);
-        SVG.selectedShape = null;
+    SVG.removeSelection = function() {
+        observer.trigger("deselectSVGShape", SVG.selectedShape);
     };
 
     /**
@@ -120,12 +126,7 @@
      * @param {SVG.Shape} shape The SVG Shape to select.
      */
     SVG.setSelection = function(shape) {
-        SVG.removeSelection(true);
-
-        if(shape.isEditable) {
-            SVG.selectedShape = shape;
-            drawSelection.call(shape);
-        }
+        observer.trigger("selectSVGShape", shape);
     };
 
     /**
