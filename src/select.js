@@ -73,8 +73,8 @@
     observer.on("selectSVGShape", function(shape) {
         SVG.removeSelection();
 
+        SVG.selectedShape = shape;
         if(shape.isEditable) {
-            SVG.selectedShape = shape;
             drawSelection.call(shape);
         }
     });
