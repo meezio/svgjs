@@ -114,5 +114,13 @@
         default:
             console.log("Unknow resize type " + type);
         }
+        /**
+         * This event is fire when a SVG Shape is resized.
+         * Event is sent event if the user don"t release the mouse button.
+         *
+         * @event SVG.Shape#SVGShapeResized
+         * @param {SVG.Shape} shape The resized Shape.
+         */
+        observer.trigger("SVGShapeResized", shape);
     });
 })(MeezioSVG);
