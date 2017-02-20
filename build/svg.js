@@ -1,35 +1,365 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>JSDoc: Source: select.js</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
-</head>
-
-<body>
-
-<div id="main">
-
-    <h1 class="page-title">Source: select.js</h1>
-
-    
-
-
-
-    
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/**
+/**
 * MIT License
 *
-* Copyright (c) 2016 Meezio SAS &lt;dev@meez.io>
+* Copyright (c) 2016 Meezio SAS <dev@meez.io>
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** @namespace observer */
+(function(global) {
+    "use strict";
+
+    var observer = {
+        ev: {},
+
+        /**
+         * Attach a callback function to an event.
+         *
+         * @memberof observer
+         * @param {string} eventName A custom event name.
+         * @param {function} fn The function to execute when the event is triggered.
+         */
+        on: function(eventName, fn) {
+            if(typeof fn === "function") {
+                (this.ev[eventName] = this.ev[eventName] || []).push(fn);
+            }
+        },
+
+        /**
+         * Attach a callback function to an event. The callback is executed at most once.
+         *
+         * @memberof observer
+         * @param {string} eventName A custom event name.
+         * @param {function} fn The function to execute when the event is triggered.
+         */
+        one: function(eventName, fn) {
+            if(fn) {
+                fn.once = true;
+            }
+
+            this.on(eventName, fn);
+        },
+
+        /**
+         * Remove a callback function from an event.
+         *
+         * @memberof observer
+         * @param {string} eventName The custom event name.
+         * @param {function} fn The callback function previously attached to the event.
+         */
+        off: function(eventName, fn) {
+            if(eventName === "*") {
+                this.ev = {};
+            }
+            else if(this.ev[eventName]) {
+                if(fn) {
+                    for(var i = 0; i < this.ev[eventName].length; i++) {
+                        if(this.ev[eventName][i] === fn) {
+                            this.ev[eventName].splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                else {
+                    this.ev[eventName] = [];
+                }
+            }
+        },
+
+        /**
+         * Execute all callbacks attached to an event. Arguments following 'eventName' are passed to the called function.
+         *
+         * @memberof observer
+         * @param {string} eventName The custom event name.
+         */
+        trigger: function(eventName) {
+            /* eslint prefer-rest-params: 0 */
+            var opts = [].slice.call(arguments, 1);
+            var fns = this.ev[eventName] || [];
+
+            for(var i = 0; i < fns.length; i++) {
+                if(!fns[i].busy) {
+                    fns[i].busy = true;
+                    fns[i].apply(this.ev[eventName], opts);
+                    if(fns[i].once) {
+                        fns.splice(i, 1);
+                        i--;
+                    }
+                    else {
+                        fns[i].busy = false;
+                    }
+                }
+            }
+        }
+    };
+
+    global.observer = observer;
+})(this);
+/**
+* MIT License
+*
+* Copyright (c) 2016 Meezio SAS <dev@meez.io>
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** @namespace SVG */
+(function(global) {
+    "use strict";
+
+    var SVG = {};
+
+    /**
+     * @memberof SVG
+     * @namespace
+     */
+    SVG.options = {};
+
+    /**
+     * SVG Namespace
+     * @memberof SVG
+     * @constant
+     * @default
+     */
+    SVG.ns = 'http://www.w3.org/2000/svg';
+
+    /**
+     * XLink namespace
+     * @memberof SVG
+     * @constant
+     * @default
+     */
+    SVG.xlink = 'http://www.w3.org/1999/xlink';
+
+    /**
+     * XHTML namespace
+     * @memberof SVG
+     * @constant
+     * @default
+     */
+    SVG.xhtml = 'http://www.w3.org/1999/xhtml';
+
+    // Element id sequence
+    var did = 1000;
+
+    // Get next named element id
+    var eid = function() {
+        return 'svg' + (did++);
+    };
+
+    /**
+     * Creates a new SVG element.
+     *
+     * @memberof SVG
+     * @param {string} name Name of the SVG element to create.
+     * @param {object} [attrs={}] SVG attribute for the element.
+     * @param {string} [namespace='http://www.w3.org/2000/svg'] Element namespace.
+     * @return {object} The SVG element created.
+     */
+    SVG.element = function(name, attrs, namespace) {
+        namespace = namespace || SVG.ns;
+        var node = document.createElementNS(namespace, name);
+
+        attrs = attrs || {};
+
+        node.setAttribute('id', eid());
+
+        node.attr = function(attributes) {
+            for(var attribute in attributes) {
+                node.setAttribute(attribute, attributes[attribute]);
+            }
+        };
+
+        node.attr(attrs);
+
+        return node;
+    };
+
+    /**
+     * Creates an instance of SVG Shape.
+     *
+     * @class
+     * @memberof SVG
+     * @property {boolean} isEditable Whether the shape editable or not.
+     */
+    SVG.Shape = function Shape() {
+        var _this = this;
+
+        this.isEditable = false;
+
+        this.node.onclick = function(ev) {
+            /**
+             * This event is fire when a SVG Shape is selected by a mouse click.
+             *
+             * @event SVG.Shape#selectSVGShape
+             * @param {SVG.Shape} shape The selected SVG Shape.
+             */
+            observer.trigger("selectSVGShape", _this);
+            ev.stopPropagation();
+        };
+    };
+
+    /**
+     * Change the size of a shape.
+     *
+     * @memberof SVG.Shape
+     * @param {number} width The width of the Shape.
+     * @param {number} height The height of the Shape.
+     * @return {SVG.Shape} The shape instance.
+     */
+    SVG.Shape.prototype.size = function(width, height) {
+        this.width = width;
+        this.height = height;
+
+        this.node.attr({
+            width: this.width,
+            height: this.height
+        });
+
+        return this;
+    };
+
+    /**
+     * Move a shape.
+     *
+     * @memberof SVG.Shape
+     * @param {number} x The abscissa of the Shape.
+     * @param {number} y The ordinate of the Shape.
+     * @return {SVG.Shape} The shape instance.
+     */
+    SVG.Shape.prototype.move = function(x, y) {
+        this.x = x;
+        this.y = y;
+
+        this.node.attr({
+            x: this.x,
+            y: this.y
+        });
+
+        return this;
+    };
+
+    /**
+     * Creates an instance of SVG Document (a &lt;svg&gt; tag) and add it to another element.
+     * @example <div id="container"></div>
+     * <script>var doc = new SVG.Document("container")</script>
+     *
+     * @class
+     * @memberof SVG
+     * @param {string} element Id attribute of the element which will contain the SVG Document.
+     * @property {number} width=100% The width of the SVG Document.
+     * @property {number} height=100% The height of the SVG Document.
+     * @property {number} x=0 The abscissa of the SVG Document.
+     * @property {number} y=0 The ordinate of the SVG Document.
+     */
+    SVG.Document = function Document(element) {
+        var _this = this;
+
+        this.width = "100%";
+        this.height = "100%";
+        this.x = 0;
+        this.y = 0;
+        this.create(element);
+
+        this.node.onclick = function(ev) {
+            /**
+             * This event is fire when a SVG Document is selected by a mouse click.
+             * @example observer.on("selectSVGDoc", function(doc) {
+             *     ...
+             * });
+             *
+             * @event SVG.Document#selectSVGDoc
+             * @param {SVG.Document} doc The selected SVG Document.
+             */
+            observer.trigger("selectSVGDoc", _this);
+            ev.stopPropagation();
+        };
+    };
+
+    SVG.Document.prototype.create = function(element) {
+        this.node = SVG.element("svg", {
+            width: this.width,
+            height: this.height,
+            version: "1.1",
+            xmlns: SVG.ns,
+            'xmlns:xlink': SVG.xlink
+        });
+
+        var container = document.getElementById(element);
+        container.innerHTML = '';
+        container.appendChild(this.node);
+    };
+
+    /**
+     * Add a SVG Shape to the SVG Document.
+     *
+     * @memberof SVG.Document
+     * @param {SVG.Shape} shape An instance of Shape to add to the SVG Document.
+     */
+    SVG.Document.prototype.add = function(shape) {
+        this.node.appendChild(shape.node);
+    };
+
+    /**
+     * Change the size of a SVG Document.
+     *
+     * @memberof SVG.Document
+     * @param {number} width The width of the Document.
+     * @param {number} height The height of the Document.
+     * @return {SVG.Document} The Document instance.
+     */
+    SVG.Document.prototype.size = function(width, height) {
+        this.width = width;
+        this.height = height;
+
+        this.node.attr({
+            width: this.width,
+            height: this.height
+        });
+
+        observer.trigger("docsized", this);
+        return this;
+    };
+
+    global.MeezioSVG = SVG;
+})(this);
+/**
+* MIT License
+*
+* Copyright (c) 2016 Meezio SAS <dev@meez.io>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -211,7 +541,7 @@
                 scale = 1;
         }
 
-        // Drawing &amp; Events binding
+        // Drawing & Events binding
         selection.appendChild(drawFrame.call(this, box, options, scale));
         if(options.rotate) selection.appendChild(drawRotateHandle.call(this, box.x + box.width / 2, box.y, options, scale));
         if(options.resizeNW) selection.appendChild(drawResizeHandle.call(this, box.x, box.y, "nwse-resize", options, 'topLeft', scale));
@@ -236,17 +566,17 @@
         function getValidEastOffset(dim, maxBox, minBox, deltaX, scale) {
             var ret = deltaX;
 
-            if(maxBox &amp;&amp; deltaX > 0) {
+            if(maxBox && deltaX > 0) {
                 if(dim.x + dim.width > (maxBox.x + maxBox.w) * scale)
                     ret = 0;
                 else
                     ret = (dim.x + dim.width + deltaX > (maxBox.x + maxBox.w) * scale ? (maxBox.x + maxBox.w) * scale - (dim.x + dim.width) : deltaX);
             }
-            else if(minBox &amp;&amp; deltaX &lt; 0) {
-                if(dim.x + dim.width &lt; (minBox.x + minBox.w) * scale)
+            else if(minBox && deltaX < 0) {
+                if(dim.x + dim.width < (minBox.x + minBox.w) * scale)
                     ret = 0;
                 else
-                    ret = (dim.x + dim.width + deltaX &lt; (minBox.x + minBox.w) * scale ? (minBox.x + minBox.w) * scale - (dim.x + dim.width) : deltaX);
+                    ret = (dim.x + dim.width + deltaX < (minBox.x + minBox.w) * scale ? (minBox.x + minBox.w) * scale - (dim.x + dim.width) : deltaX);
             }
 
             return ret;
@@ -265,13 +595,13 @@
         function getValidWestOffset(dim, maxBox, minBox, deltaX, scale) {
             var ret = deltaX;
 
-            if(maxBox &amp;&amp; deltaX &lt; 0) {
-                if(dim.x &lt; maxBox.x * scale)
+            if(maxBox && deltaX < 0) {
+                if(dim.x < maxBox.x * scale)
                     ret = 0;
                 else
-                    ret = (dim.x + deltaX &lt; maxBox.x * scale ? maxBox.x * scale - dim.x : deltaX);
+                    ret = (dim.x + deltaX < maxBox.x * scale ? maxBox.x * scale - dim.x : deltaX);
             }
-            else if(minBox &amp;&amp; deltaX > 0) {
+            else if(minBox && deltaX > 0) {
                 if(dim.x > minBox.x * scale)
                     ret = 0;
                 else
@@ -294,17 +624,17 @@
         function getValidSouthOffset(dim, maxBox, minBox, deltaY, scale) {
             var ret = deltaY;
 
-            if(maxBox &amp;&amp; deltaY > 0) {
+            if(maxBox && deltaY > 0) {
                 if(dim.y + dim.height > (maxBox.y + maxBox.h) * scale)
                     ret = 0;
                 else
                     ret = (dim.y + dim.height + deltaY > (maxBox.y + maxBox.h) * scale ? (maxBox.y + maxBox.h) * scale - (dim.y + dim.height) : deltaY);
             }
-            else if(minBox &amp;&amp; deltaY &lt; 0) {
-                if(dim.y + dim.height &lt; (minBox.y + minBox.h) * scale)
+            else if(minBox && deltaY < 0) {
+                if(dim.y + dim.height < (minBox.y + minBox.h) * scale)
                     ret = 0;
                 else
-                    ret = (dim.y + dim.height + deltaY &lt; (minBox.y + minBox.h) * scale ? (minBox.y + minBox.h) * scale - (dim.y + dim.height) : deltaY);
+                    ret = (dim.y + dim.height + deltaY < (minBox.y + minBox.h) * scale ? (minBox.y + minBox.h) * scale - (dim.y + dim.height) : deltaY);
             }
 
             return ret;
@@ -323,13 +653,13 @@
         function getValidNorthOffset(dim, maxBox, minBox, deltaY, scale) {
             var ret = deltaY;
 
-            if(maxBox &amp;&amp; deltaY &lt; 0) {
-                if(dim.y &lt; maxBox.y * scale)
+            if(maxBox && deltaY < 0) {
+                if(dim.y < maxBox.y * scale)
                     ret = 0;
                 else
-                    ret = (dim.y + deltaY &lt; maxBox.y * scale ? maxBox.y * scale - dim.y : deltaY);
+                    ret = (dim.y + deltaY < maxBox.y * scale ? maxBox.y * scale - dim.y : deltaY);
             }
-            else if(minBox &amp;&amp; deltaY > 0) {
+            else if(minBox && deltaY > 0) {
                 if(dim.y > minBox.y * scale)
                     ret = 0;
                 else
@@ -344,7 +674,7 @@
             var dim = frame.getBBox();
             deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if(dim.height + deltaY > 0 &amp;&amp; deltaY !== 0) {
+            if(dim.height + deltaY > 0 && deltaY !== 0) {
                 frame.setAttribute('height', dim.height + deltaY);
                 this.translateNode(".bottomLeft", 0, deltaY);
                 this.translateNode(".bottom", 0, deltaY);
@@ -361,7 +691,7 @@
             var dim = frame.getBBox();
             deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
 
-            if(dim.width + deltaX > 0 &amp;&amp; deltaX !== 0) {
+            if(dim.width + deltaX > 0 && deltaX !== 0) {
                 frame.setAttribute('width', dim.width + deltaX);
                 this.translateNode(".topRight", deltaX, 0);
                 this.translateNode(".right", deltaX, 0);
@@ -379,7 +709,7 @@
             var dim = frame.getBBox();
             deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if(dim.height - deltaY > 0 &amp;&amp; deltaY !== 0) {
+            if(dim.height - deltaY > 0 && deltaY !== 0) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
                 this.translateNode(".topLeft", 0, deltaY);
@@ -398,7 +728,7 @@
             var dim = frame.getBBox();
             deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
 
-            if(dim.width - deltaX > 0 &amp;&amp; deltaX !== 0) {
+            if(dim.width - deltaX > 0 && deltaX !== 0) {
                 frame.setAttribute('x', dim.x + deltaX);
                 frame.setAttribute('width', dim.width - deltaX);
                 this.translateNode(".topLeft", deltaX, 0);
@@ -421,11 +751,11 @@
             deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 &amp;&amp; dim.height - deltaY > 0) &amp;&amp; (deltaX === 0 || dim.width - deltaX &lt;= 0))
+            if((deltaY !== 0 && dim.height - deltaY > 0) && (deltaX === 0 || dim.width - deltaX <= 0))
                 return this.moveUp(deltaY, options, scale);
-            else if((deltaX !== 0 &amp;&amp; dim.width - deltaX > 0) &amp;&amp; (deltaY === 0 || dim.height - deltaY &lt;= 0))
+            else if((deltaX !== 0 && dim.width - deltaX > 0) && (deltaY === 0 || dim.height - deltaY <= 0))
                 return this.moveLeft(deltaX, options, scale);
-            else if(dim.width - deltaX > 0 &amp;&amp; dim.height - deltaY > 0 &amp;&amp; deltaX !== 0 &amp;&amp; deltaY !== 0) {
+            else if(dim.width - deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
                 frame.setAttribute('x', dim.x + deltaX);
@@ -452,11 +782,11 @@
             deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 &amp;&amp; dim.height + deltaY > 0) &amp;&amp; (deltaX === 0 || dim.width + deltaX &lt;= 0))
+            if((deltaY !== 0 && dim.height + deltaY > 0) && (deltaX === 0 || dim.width + deltaX <= 0))
                 return this.moveDown(deltaY, options, scale);
-            else if((deltaX !== 0 &amp;&amp; dim.width + deltaX > 0) &amp;&amp; (deltaY === 0 || dim.height + deltaY &lt;= 0))
+            else if((deltaX !== 0 && dim.width + deltaX > 0) && (deltaY === 0 || dim.height + deltaY <= 0))
                 return this.moveRight(deltaX, options, scale);
-            else if(dim.width + deltaX > 0 &amp;&amp; dim.height + deltaY > 0 &amp;&amp; deltaX !== 0 &amp;&amp; deltaY !== 0) {
+            else if(dim.width + deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('height', dim.height + deltaY);
                 frame.setAttribute('width', dim.width + deltaX);
                 this.translateNode(".bottomLeft", 0, deltaY);
@@ -481,11 +811,11 @@
             deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 &amp;&amp; dim.height + deltaY > 0) &amp;&amp; (deltaX === 0 || dim.width - deltaX &lt;= 0))
+            if((deltaY !== 0 && dim.height + deltaY > 0) && (deltaX === 0 || dim.width - deltaX <= 0))
                 return this.moveDown(deltaY, options, scale);
-            else if((deltaX !== 0 &amp;&amp; dim.width - deltaX > 0) &amp;&amp; (deltaY === 0 || dim.height + deltaY &lt;= 0))
+            else if((deltaX !== 0 && dim.width - deltaX > 0) && (deltaY === 0 || dim.height + deltaY <= 0))
                 return this.moveLeft(deltaX, options, scale);
-            else if(dim.width - deltaX > 0 &amp;&amp; dim.height + deltaY > 0 &amp;&amp; deltaX !== 0 &amp;&amp; deltaY !== 0) {
+            else if(dim.width - deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('x', dim.x + deltaX);
                 frame.setAttribute('width', dim.width - deltaX);
                 frame.setAttribute('height', dim.height + deltaY);
@@ -511,11 +841,11 @@
             deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
-            if((deltaY !== 0 &amp;&amp; dim.height - deltaY > 0) &amp;&amp; (deltaX === 0 || dim.width + deltaX &lt;= 0))
+            if((deltaY !== 0 && dim.height - deltaY > 0) && (deltaX === 0 || dim.width + deltaX <= 0))
                 return this.moveUp(deltaY, options, scale);
-            else if((deltaX !== 0 &amp;&amp; dim.width + deltaX > 0) &amp;&amp; (deltaY === 0 || dim.height - deltaY &lt;= 0))
+            else if((deltaX !== 0 && dim.width + deltaX > 0) && (deltaY === 0 || dim.height - deltaY <= 0))
                 return this.moveRight(deltaX, options, scale);
-            else if(dim.width + deltaX > 0 &amp;&amp; dim.height - deltaY > 0 &amp;&amp; deltaX !== 0 &amp;&amp; deltaY !== 0) {
+            else if(dim.width + deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                 frame.setAttribute('y', dim.y + deltaY);
                 frame.setAttribute('height', dim.height - deltaY);
                 frame.setAttribute('width', dim.width + deltaX);
@@ -568,7 +898,7 @@
      */
     function drawFrame(box, options, scale) {
         var _this = this;
-        // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF &lt; v39)
+        // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF < v39)
         var initPositionX = 0;
         var initPositionY = 0;
 
@@ -662,7 +992,7 @@
      */
     function drawResizeHandle(x, y, cursor, options, type, scale) {
         var _this = this;
-        // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF &lt; v39)
+        // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF < v39)
         var initPositionX = 0;
         var initPositionY = 0;
 
@@ -765,7 +1095,7 @@
      */
     function drawRotateHandle(x, y, options, scale) {
         var _this = this;
-        // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF &lt; v39)
+        // Position de la souris lors du mousedown/touchstart sur d'un handle. Nécessaire pour calculer l'offset (FF < v39)
         var initPositionX = 0;
         var initPositionY = 0;
 
@@ -871,26 +1201,129 @@
         html.removeAttribute('style');
     }
 })(MeezioSVG);
-</code></pre>
-        </article>
-    </section>
+/**
+* MIT License
+*
+* Copyright (c) 2016 Meezio SAS <dev@meez.io>
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
 
+(function(SVG) {
+    "use strict";
 
+    /**
+     * Move and/or resize a Shape by updating its edges coordinates. If an edge coordonate is set to null, its position won't be updated.
+     *
+     * @memberof SVG.Shape
+     * @param {number} left The abscissa of the left egde.
+     * @param {number} top The ordinate of the top edge.
+     * @param {number} right The abscissa of the right edge.
+     * @param {number} bottom The ordinate of the bottom edge.
+     * @return {SVG.Shape} The shape instance.
+     */
+    SVG.Shape.prototype.place = function(left, top, right, bottom) {
+        if(left) {
+            this.node.setAttribute('width', this.width = this.width + this.x - left);
+            this.node.setAttribute('x', this.x = left);
+        }
 
+        if(top) {
+            this.node.setAttribute('height', this.height = this.height + this.y - top);
+            this.node.setAttribute('y', this.y = top);
+        }
 
-</div>
+        if(right) this.node.setAttribute('width', this.width = right - this.x);
+        if(bottom) this.node.setAttribute('height', this.height = bottom - this.y);
 
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SVG.Document.html">SVG.Document</a></li><li><a href="SVG.Shape.html">SVG.Shape</a></li></ul><h3>Events</h3><ul><li><a href="SVG.Document.html#event:selectSVGDoc">SVG.Document#selectSVGDoc</a></li><li><a href="SVG.Shape.html#event:deselectSVGShape">SVG.Shape#deselectSVGShape</a></li><li><a href="SVG.Shape.html#event:moveSVGShape">SVG.Shape#moveSVGShape</a></li><li><a href="SVG.Shape.html#event:resizeSVGShape">SVG.Shape#resizeSVGShape</a></li><li><a href="SVG.Shape.html#event:rotateSVGShape">SVG.Shape#rotateSVGShape</a></li><li><a href="SVG.Shape.html#event:selectSVGShape">SVG.Shape#selectSVGShape</a></li><li><a href="SVG.Shape.html#event:SVGShapeResized">SVG.Shape#SVGShapeResized</a></li></ul><h3>Namespaces</h3><ul><li><a href="observer.html">observer</a></li><li><a href="SVG.html">SVG</a></li><li><a href="SVG.options.html">SVG.options</a></li></ul>
-</nav>
+        return this;
+    };
 
-<br class="clear">
+    observer.on("rotateSVGShape", function(shape, selection, deltaX, deltaY, scale) {
+        // TODO implement rotation selection and shape (with transform but see how to compute degres)
+        console.log(shape, selection, deltaX, deltaY);
+        console.log(shape.editableOptions);
+    });
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 20 2017 18:25:01 GMT+0100 (CET)
-</footer>
+    observer.on("moveSVGShape", function(shape, selection, deltaX, deltaY, scale) {
+        var newBox = selection.move(deltaX, deltaY);
+        // TODO ajouter les contraintes de box (options) pour limiter le déplacement
+        shape.move(newBox.x / scale, newBox.y / scale);
+    });
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
-</body>
-</html>
+    observer.on("resizeSVGShape", function(shape, selection, type, deltaX, deltaY, scale) {
+        var newBox = null;
+        var opt = shape.editableOptions;
+        var shapeBox = shape.node.getBBox();
+        var aspectRatio = shapeBox.width / shapeBox.height;
+
+        switch(type) {
+        case "top":
+            if((newBox = selection.moveUp(deltaY, opt, scale))) {
+                shape.place(0, newBox.y / scale, 0, 0);
+            }
+            break;
+        case "bottom":
+            if((newBox = selection.moveDown(deltaY, opt, scale))) {
+                shape.place(0, 0, 0, (newBox.y + newBox.height) / scale);
+            }
+            break;
+        case "left":
+            if((newBox = selection.moveLeft(deltaX, opt, scale))) {
+                shape.place(newBox.x / scale, 0, 0, 0);
+            }
+            break;
+        case "right":
+            if((newBox = selection.moveRight(deltaX, opt, scale))) {
+                shape.place(0, 0, (newBox.x + newBox.width) / scale, 0);
+            }
+            break;
+        case "topLeft":
+            if((newBox = selection.moveUpLeft(deltaX, deltaY, opt, aspectRatio, scale))) {
+                shape.place(newBox.x / scale, newBox.y / scale, 0, 0);
+            }
+            break;
+        case "topRight":
+            if((newBox = selection.moveUpRight(deltaX, deltaY, opt, aspectRatio, scale))) {
+                shape.place(0, newBox.y / scale, (newBox.x + newBox.width) / scale, 0);
+            }
+            break;
+        case "bottomLeft":
+            if((newBox = selection.moveDownLeft(deltaX, deltaY, opt, aspectRatio, scale))) {
+                shape.place(newBox.x / scale, 0, 0, (newBox.y + newBox.height) / scale);
+            }
+            break;
+        case "bottomRight":
+            if((newBox = selection.moveDownRight(deltaX, deltaY, opt, aspectRatio, scale))) {
+                shape.place(0, 0, (newBox.x + newBox.width) / scale, (newBox.y + newBox.height) / scale);
+            }
+            break;
+        default:
+            console.log("Unknow resize type " + type);
+        }
+        /**
+         * This event is fire when a SVG Shape is resized.
+         * Event is sent event if the user don"t release the mouse button.
+         *
+         * @event SVG.Shape#SVGShapeResized
+         * @param {SVG.Shape} shape The resized Shape.
+         */
+        observer.trigger("SVGShapeResized", shape);
+    });
+})(MeezioSVG);

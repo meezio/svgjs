@@ -5,8 +5,19 @@
 NAME=svg
 
 mkdir -p build
-uglifyjs -o build/${NAME}.min.js \
+
+cat \
   src/event.js \
   src/svg.js \
   src/select.js \
-  src/edit.js
+  src/edit.js \
+> build/${NAME}.js
+
+DIR=$(pwd)
+cd build
+
+uglifyjs --source-map ${NAME}.min.js.map -o ${NAME}.min.js ${NAME}.js
+
+cd $DIR
+
+

@@ -8,6 +8,13 @@ rules:
     indent:
         - error
         - 4
+    comma-dangle:
+        - error
+        - never
+    quotes: 0
+    no-invalid-this: 0
+    no-var: 0
+    require-jsdoc: 1
     keyword-spacing:
         - 2
         - overrides:

@@ -90,6 +90,7 @@
          * @param {string} eventName The custom event name.
          */
         trigger: function(eventName) {
+            /* eslint prefer-rest-params: 0 */
             var opts = [].slice.call(arguments, 1);
             var fns = this.ev[eventName] || [];
 
