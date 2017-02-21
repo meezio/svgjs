@@ -505,11 +505,12 @@
      * @return {object} The selection highlight object.
      */
     function drawSelection() {
+        var tmp = this.node.getBBox();
         var box = {
-            x: this.node.x.baseVal.value,
-            y: this.node.y.baseVal.value,
-            width: this.node.width.baseVal.value,
-            height: this.node.height.baseVal.value
+            x: tmp.x,
+            y: tmp.y,
+            width: tmp.width,
+            height: tmp.height
         };
 
         var svgDoc = this.node.closest("svg");
