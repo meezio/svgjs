@@ -280,19 +280,20 @@
      * @class
      * @memberof SVG
      * @param {string} element Id attribute of the element which will contain the SVG Document.
+     * @param {string} svgid Id attribute of the SVG element created.
      * @property {number} width=100% The width of the SVG Document.
      * @property {number} height=100% The height of the SVG Document.
      * @property {number} x=0 The abscissa of the SVG Document.
      * @property {number} y=0 The ordinate of the SVG Document.
      */
-    SVG.Document = function Document(element) {
+    SVG.Document = function Document(element, svgid) {
         var _this = this;
 
         this.width = "100%";
         this.height = "100%";
         this.x = 0;
         this.y = 0;
-        this.create(element);
+        this.create(element, svgid);
 
         this.node.onclick = function(ev) {
             /**
@@ -309,7 +310,7 @@
         };
     };
 
-    SVG.Document.prototype.create = function(element) {
+    SVG.Document.prototype.create = function(element, svgid) {
         this.node = SVG.element("svg", {
             width: this.width,
             height: this.height,
@@ -317,6 +318,9 @@
             xmlns: SVG.ns,
             'xmlns:xlink': SVG.xlink
         });
+
+        if(svgid)
+            this.node.setAttribute('id', svgid);
 
         var container = document.getElementById(element);
         container.innerHTML = '';
