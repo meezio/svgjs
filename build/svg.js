@@ -756,23 +756,33 @@
             deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
+            if(options.preserveAspectRatio) {
+                if(deltaX === 0) deltaY = 0;
+                if(deltaY === 0) deltaX = 0;
+            }
+
             if((deltaY !== 0 && dim.height - deltaY > 0) && (deltaX === 0 || dim.width - deltaX <= 0))
                 return this.moveUp(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width - deltaX > 0) && (deltaY === 0 || dim.height - deltaY <= 0))
                 return this.moveLeft(deltaX, options, scale);
-            else if(dim.width - deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
-                frame.setAttribute('y', dim.y + deltaY);
-                frame.setAttribute('height', dim.height - deltaY);
-                frame.setAttribute('x', dim.x + deltaX);
-                frame.setAttribute('width', dim.width - deltaX);
-                this.translateNode(".topLeft", deltaX, deltaY);
-                this.translateNode(".left", deltaX, deltaY / 2);
-                this.translateNode(".bottomLeft", deltaX, 0);
-                this.translateNode(".rotate", deltaX / 2, deltaY);
-                this.translateNode(".top", deltaX / 2, deltaY);
-                this.translateNode(".bottom", deltaX / 2, 0);
-                this.translateNode(".topRight", 0, deltaY);
-                this.translateNode(".right", 0, deltaY / 2);
+            else {
+                if(options.preserveAspectRatio)
+                    deltaX = deltaY * aspectRatio;
+
+                if(dim.width - deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
+                    frame.setAttribute('y', dim.y + deltaY);
+                    frame.setAttribute('height', dim.height - deltaY);
+                    frame.setAttribute('x', dim.x + deltaX);
+                    frame.setAttribute('width', dim.width - deltaX);
+                    this.translateNode(".topLeft", deltaX, deltaY);
+                    this.translateNode(".left", deltaX, deltaY / 2);
+                    this.translateNode(".bottomLeft", deltaX, 0);
+                    this.translateNode(".rotate", deltaX / 2, deltaY);
+                    this.translateNode(".top", deltaX / 2, deltaY);
+                    this.translateNode(".bottom", deltaX / 2, 0);
+                    this.translateNode(".topRight", 0, deltaY);
+                    this.translateNode(".right", 0, deltaY / 2);
+                }
                 return frame.getBBox();
             }
             return null;
@@ -787,21 +797,31 @@
             deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
+            if(options.preserveAspectRatio) {
+                if(deltaX === 0) deltaY = 0;
+                if(deltaY === 0) deltaX = 0;
+            }
+
             if((deltaY !== 0 && dim.height + deltaY > 0) && (deltaX === 0 || dim.width + deltaX <= 0))
                 return this.moveDown(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width + deltaX > 0) && (deltaY === 0 || dim.height + deltaY <= 0))
                 return this.moveRight(deltaX, options, scale);
-            else if(dim.width + deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
-                frame.setAttribute('height', dim.height + deltaY);
-                frame.setAttribute('width', dim.width + deltaX);
-                this.translateNode(".bottomLeft", 0, deltaY);
-                this.translateNode(".bottomRight", deltaX, deltaY);
-                this.translateNode(".topRight", deltaX, 0);
-                this.translateNode(".rotate", deltaX / 2, 0);
-                this.translateNode(".top", deltaX / 2, 0);
-                this.translateNode(".bottom", deltaX / 2, deltaY);
-                this.translateNode(".left", 0, deltaY / 2);
-                this.translateNode(".right", deltaX, deltaY / 2);
+            else {
+                if(options.preserveAspectRatio)
+                    deltaX = deltaY * aspectRatio;
+
+                if(dim.width + deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
+                    frame.setAttribute('height', dim.height + deltaY);
+                    frame.setAttribute('width', dim.width + deltaX);
+                    this.translateNode(".bottomLeft", 0, deltaY);
+                    this.translateNode(".bottomRight", deltaX, deltaY);
+                    this.translateNode(".topRight", deltaX, 0);
+                    this.translateNode(".rotate", deltaX / 2, 0);
+                    this.translateNode(".top", deltaX / 2, 0);
+                    this.translateNode(".bottom", deltaX / 2, deltaY);
+                    this.translateNode(".left", 0, deltaY / 2);
+                    this.translateNode(".right", deltaX, deltaY / 2);
+                }
                 return frame.getBBox();
             }
             return null;
@@ -816,22 +836,32 @@
             deltaX = getValidWestOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidSouthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
+            if(options.preserveAspectRatio) {
+                if(deltaX === 0) deltaY = 0;
+                if(deltaY === 0) deltaX = 0;
+            }
+
             if((deltaY !== 0 && dim.height + deltaY > 0) && (deltaX === 0 || dim.width - deltaX <= 0))
                 return this.moveDown(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width - deltaX > 0) && (deltaY === 0 || dim.height + deltaY <= 0))
                 return this.moveLeft(deltaX, options, scale);
-            else if(dim.width - deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
-                frame.setAttribute('x', dim.x + deltaX);
-                frame.setAttribute('width', dim.width - deltaX);
-                frame.setAttribute('height', dim.height + deltaY);
-                this.translateNode(".topLeft", deltaX, 0);
-                this.translateNode(".left", deltaX, deltaY / 2);
-                this.translateNode(".bottomLeft", deltaX, deltaY);
-                this.translateNode(".rotate", deltaX / 2, 0);
-                this.translateNode(".top", deltaX / 2, 0);
-                this.translateNode(".bottom", deltaX / 2, deltaY);
-                this.translateNode(".bottomRight", 0, deltaY);
-                this.translateNode(".right", 0, deltaY / 2);
+            else {
+                if(options.preserveAspectRatio)
+                    deltaX = deltaY * aspectRatio;
+
+                if(dim.width - deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
+                    frame.setAttribute('x', dim.x + deltaX);
+                    frame.setAttribute('width', dim.width - deltaX);
+                    frame.setAttribute('height', dim.height + deltaY);
+                    this.translateNode(".topLeft", deltaX, 0);
+                    this.translateNode(".left", deltaX, deltaY / 2);
+                    this.translateNode(".bottomLeft", deltaX, deltaY);
+                    this.translateNode(".rotate", deltaX / 2, 0);
+                    this.translateNode(".top", deltaX / 2, 0);
+                    this.translateNode(".bottom", deltaX / 2, deltaY);
+                    this.translateNode(".bottomRight", 0, deltaY);
+                    this.translateNode(".right", 0, deltaY / 2);
+                }
                 return frame.getBBox();
             }
             return null;
@@ -846,22 +876,32 @@
             deltaX = getValidEastOffset(dim, options.maxBox, options.minBox, deltaX, scale);
             deltaY = getValidNorthOffset(dim, options.maxBox, options.minBox, deltaY, scale);
 
+            if(options.preserveAspectRatio) {
+                if(deltaX === 0) deltaY = 0;
+                if(deltaY === 0) deltaX = 0;
+            }
+
             if((deltaY !== 0 && dim.height - deltaY > 0) && (deltaX === 0 || dim.width + deltaX <= 0))
                 return this.moveUp(deltaY, options, scale);
             else if((deltaX !== 0 && dim.width + deltaX > 0) && (deltaY === 0 || dim.height - deltaY <= 0))
                 return this.moveRight(deltaX, options, scale);
-            else if(dim.width + deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
-                frame.setAttribute('y', dim.y + deltaY);
-                frame.setAttribute('height', dim.height - deltaY);
-                frame.setAttribute('width', dim.width + deltaX);
-                this.translateNode(".topRight", deltaX, deltaY);
-                this.translateNode(".right", deltaX, deltaY / 2);
-                this.translateNode(".bottomRight", deltaX, 0);
-                this.translateNode(".rotate", deltaX / 2, deltaY);
-                this.translateNode(".top", deltaX / 2, deltaY);
-                this.translateNode(".bottom", deltaX / 2, 0);
-                this.translateNode(".topLeft", 0, deltaY);
-                this.translateNode(".left", 0, deltaY / 2);
+            else {
+                if(options.preserveAspectRatio)
+                    deltaX = deltaY * aspectRatio;
+
+                if(dim.width + deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
+                    frame.setAttribute('y', dim.y + deltaY);
+                    frame.setAttribute('height', dim.height - deltaY);
+                    frame.setAttribute('width', dim.width + deltaX);
+                    this.translateNode(".topRight", deltaX, deltaY);
+                    this.translateNode(".right", deltaX, deltaY / 2);
+                    this.translateNode(".bottomRight", deltaX, 0);
+                    this.translateNode(".rotate", deltaX / 2, deltaY);
+                    this.translateNode(".top", deltaX / 2, deltaY);
+                    this.translateNode(".bottom", deltaX / 2, 0);
+                    this.translateNode(".topLeft", 0, deltaY);
+                    this.translateNode(".left", 0, deltaY / 2);
+                }
                 return frame.getBBox();
             }
             return null;
