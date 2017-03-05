@@ -485,7 +485,7 @@
                 return this.moveLeft(deltaX, options, scale);
             else {
                 if(options.preserveAspectRatio)
-                    deltaX = deltaY * aspectRatio;
+                    deltaX = -deltaY * aspectRatio;
 
                 if(dim.width - deltaX > 0 && dim.height + deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                     frame.setAttribute('x', dim.x + deltaX);
@@ -525,7 +525,7 @@
                 return this.moveRight(deltaX, options, scale);
             else {
                 if(options.preserveAspectRatio)
-                    deltaX = deltaY * aspectRatio;
+                    deltaX = -deltaY * aspectRatio;
 
                 if(dim.width + deltaX > 0 && dim.height - deltaY > 0 && deltaX !== 0 && deltaY !== 0) {
                     frame.setAttribute('y', dim.y + deltaY);
